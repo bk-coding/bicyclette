@@ -70,6 +70,9 @@
       animation: explosionDebris 3s ease-out forwards;
       z-index: 2;
     }
+    .reel.dance {
+      animation: reelDance 0.45s ease-in-out infinite alternate;
+    }
     .result {
       margin-top: 30px;
       min-height: 60px;
@@ -168,6 +171,15 @@
         opacity: 0;
       }
     }
+
+    @keyframes reelDance {
+      0% {
+        transform: translateX(-8px) rotate(-8deg) scale(1.05);
+      }
+      100% {
+        transform: translateX(8px) rotate(8deg) scale(1.05);
+      }
+    }
   </style>
 </head>
 <body>
@@ -178,11 +190,13 @@
   </div>
 
   <div class="result" id="result"></div>
+  <audio id="jingle" src="jingle.mp3" preload="auto"></audio>
 
   <script>
-    const items = ['🥕', '🍅', '🥬', '🪏', '🪱', '🌳', '🐹', '🚲'];
+    const items = ['🥕', '🍅', '🥬', '🪏', '🪱', '🌳', '🐹', '🚲', '🪧'];
     const reelIds = ['r1', 'r2', 'r3'];
     const resultEl = document.getElementById('result');
+    const jingleEl = document.getElementById('jingle');
 
     // Pourcentage de chances d'obtenir une combinaison de 3 symboles identiques.
     // 0.10 = 10 %, 0.25 = 25 %, 1 = 100 %.
@@ -211,22 +225,39 @@
       return results;
     }
 
-    function clearExplosionAnimation() {
+    function clearReelAnimations() {
       reelIds.forEach((id) => {
         const reel = document.getElementById(id);
-        reel.classList.remove('explode');
+        reel.classList.remove('explode', 'dance');
         reel.style.transform = '';
         reel.style.opacity = '';
       });
     }
 
     function triggerExplosionAnimation() {
-      clearExplosionAnimation();
+      clearReelAnimations();
 
       reelIds.forEach((id) => {
         const reel = document.getElementById(id);
         void reel.offsetWidth;
         reel.classList.add('explode');
+      });
+    }
+
+    function triggerDanceAnimation() {
+      clearReelAnimations();
+
+      reelIds.forEach((id, index) => {
+        const reel = document.getElementById(id);
+        reel.style.animationDelay = `${index * 0.12}s`;
+        reel.classList.add('dance');
+      });
+    }
+
+    function playJingle() {
+      jingleEl.currentTime = 0;
+      jingleEl.play().catch(() => {
+        console.warn('Le fichier jingle.mp3 est absent ou la lecture automatique est bloquée.');
       });
     }
 
@@ -251,7 +282,9 @@
 
       finalResults = [];
       resultEl.textContent = '';
-      clearExplosionAnimation();
+      clearReelAnimations();
+      jingleEl.pause();
+      jingleEl.currentTime = 0;
 
       reelIds.forEach((id, index) => {
         setTimeout(() => {
@@ -270,6 +303,14 @@
       const [r1, r2, r3] = finalResults;
       const allSame = r1 === r2 && r2 === r3;
       const hasBike = finalResults.includes('🚲');
+      const isJingleCombination = r1 === '🪏' && r2 === '🪧' && r3 === '🌳';
+
+      if (isJingleCombination) {
+        triggerDanceAnimation();
+        playJingle();
+        resultEl.textContent = '🎶 Une bêche, une pancarte, un arbre… 🎶';
+        return;
+      }
 
       if (allSame && r1 === '🪏') {
         triggerExplosionAnimation();
