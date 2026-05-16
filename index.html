@@ -184,10 +184,31 @@
     const reelIds = ['r1', 'r2', 'r3'];
     const resultEl = document.getElementById('result');
 
+    // Pourcentage de chances d'obtenir une combinaison de 3 symboles identiques.
+    // 0.10 = 10 %, 0.25 = 25 %, 1 = 100 %.
+    const SAME_SYMBOL_CHANCE = 0.10;
+
     let finalResults = [];
 
     function getRandomItem() {
       return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function generateSpinResults() {
+      const shouldForceSameSymbols = Math.random() < SAME_SYMBOL_CHANCE;
+
+      if (shouldForceSameSymbols) {
+        const winningItem = getRandomItem();
+        return [winningItem, winningItem, winningItem];
+      }
+
+      let results;
+
+      do {
+        results = [getRandomItem(), getRandomItem(), getRandomItem()];
+      } while (results[0] === results[1] && results[1] === results[2]);
+
+      return results;
     }
 
     function clearExplosionAnimation() {
@@ -209,31 +230,32 @@
       });
     }
 
-    function spinReel(id, delay, onComplete) {
+    function spinReel(id, delay, finalItem, onComplete) {
       let count = 0;
-      let finalItem = getRandomItem();
       const el = document.getElementById(id);
 
       const interval = setInterval(() => {
-        finalItem = getRandomItem();
-        el.textContent = finalItem;
+        el.textContent = getRandomItem();
         count++;
 
         if (count > 20 + delay * 5) {
           clearInterval(interval);
+          el.textContent = finalItem;
           onComplete(finalItem);
         }
       }, 100);
     }
 
     function startSpin() {
+      const plannedResults = generateSpinResults();
+
       finalResults = [];
       resultEl.textContent = '';
       clearExplosionAnimation();
 
       reelIds.forEach((id, index) => {
         setTimeout(() => {
-          spinReel(id, index, (finalItem) => {
+          spinReel(id, index, plannedResults[index], (finalItem) => {
             finalResults[index] = finalItem;
 
             if (finalResults.filter(Boolean).length === reelIds.length) {
