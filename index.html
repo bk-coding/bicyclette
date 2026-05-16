@@ -247,7 +247,6 @@
     function checkResult() {
       const [r1, r2, r3] = finalResults;
       const allSame = r1 === r2 && r2 === r3;
-      const allDifferent = new Set(finalResults).size === finalResults.length;
       const hasBike = finalResults.includes('🚲');
 
       if (allSame && r1 === '🪏') {
@@ -267,9 +266,7 @@
         return;
       }
 
-      if (allDifferent) {
-        resultEl.textContent = 'PERDU';
-      }
+      resultEl.textContent = 'PERDU';
     }
 
     function startCountdownAndRelaunch() {
