@@ -11,6 +11,7 @@
       background: transparent;
       overflow: hidden;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
@@ -31,6 +32,15 @@
       align-items: center;
       border-radius: 12px;
     }
+    .result {
+      margin-top: 30px;
+      min-height: 60px;
+      color: white;
+      font-size: 42px;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: 0 0 10px black, 0 0 20px black;
+    }
   </style>
 </head>
 <body>
@@ -40,26 +50,90 @@
     <div class="reel" id="r3">🎰</div>
   </div>
 
+  <div class="result" id="result"></div>
+
   <script>
-    const items = ['🥕', '🍅', '🥬','🪏', '🪱', '🌳', '🐹', '🚲'];
+    const items = ['🥕', '🍅', '🥬', '🪏', '🪱', '🌳', '🐹', '🚲'];
+    const reelIds = ['r1', 'r2', 'r3'];
+    const resultEl = document.getElementById('result');
+
+    let finalResults = [];
+
     function getRandomItem() {
       return items[Math.floor(Math.random() * items.length)];
     }
 
-    function spinReel(id, delay) {
+    function spinReel(id, delay, onComplete) {
       let count = 0;
+      let finalItem = getRandomItem();
       const el = document.getElementById(id);
+
       const interval = setInterval(() => {
-        el.textContent = getRandomItem();
+        finalItem = getRandomItem();
+        el.textContent = finalItem;
         count++;
-        if (count > 20 + delay * 5) clearInterval(interval);
+
+        if (count > 20 + delay * 5) {
+          clearInterval(interval);
+          onComplete(finalItem);
+        }
       }, 100);
     }
 
+    function startSpin() {
+      finalResults = [];
+      resultEl.textContent = '';
+
+      reelIds.forEach((id, index) => {
+        setTimeout(() => {
+          spinReel(id, index, (finalItem) => {
+            finalResults[index] = finalItem;
+
+            if (finalResults.filter(Boolean).length === reelIds.length) {
+              checkResult();
+            }
+          });
+        }, index * 200);
+      });
+    }
+
+    function checkResult() {
+      const [r1, r2, r3] = finalResults;
+      const allSame = r1 === r2 && r2 === r3;
+      const hasBike = finalResults.includes('🚲');
+
+      if (allSame && r1 === '🪏') {
+        resultEl.textContent = 'ET C’EST UN BAN !!!';
+        return;
+      }
+
+      if (allSame) {
+        resultEl.textContent = 'ET C’EST UNE BICYCLETTE !!!';
+        return;
+      }
+
+      if (hasBike) {
+        startCountdownAndRelaunch();
+      }
+    }
+
+    function startCountdownAndRelaunch() {
+      let seconds = 5;
+      resultEl.textContent = `ON RELANCE DANS ${seconds}`;
+
+      const countdown = setInterval(() => {
+        seconds--;
+        resultEl.textContent = `ON RELANCE DANS ${seconds}`;
+
+        if (seconds <= 0) {
+          clearInterval(countdown);
+          startSpin();
+        }
+      }, 1000);
+    }
+
     window.onload = () => {
-      spinReel('r1', 0);
-      setTimeout(() => spinReel('r2', 1), 200);
-      setTimeout(() => spinReel('r3', 2), 400);
+      startSpin();
     };
   </script>
 </body>
