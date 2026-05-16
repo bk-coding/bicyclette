@@ -333,11 +333,11 @@
 
     function startCountdownAndRelaunch() {
       let seconds = 5;
-      resultEl.textContent = `ON RELANCE DANS ${seconds}`;
+      resultEl.textContent = `RELANCE DANS ${seconds}`;
 
       const countdown = setInterval(() => {
         seconds--;
-        resultEl.textContent = `ON RELANCE DANS ${seconds}`;
+        resultEl.textContent = `RELANCE DANS ${seconds}`;
 
         if (seconds <= 0) {
           clearInterval(countdown);
