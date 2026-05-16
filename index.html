@@ -32,9 +32,10 @@
       justify-content: center;
       align-items: center;
       border-radius: 12px;
+      overflow: visible;
     }
     .reel.explode {
-      animation: reelExplosion 0.8s ease-out forwards;
+      animation: reelDestruction 3s ease-out forwards;
     }
     .reel.explode::before {
       content: '💥';
@@ -45,7 +46,28 @@
       align-items: center;
       font-size: 120px;
       pointer-events: none;
-      animation: bombExplosion 0.8s ease-out forwards;
+      animation: bombExplosion 3s ease-out forwards;
+      z-index: 3;
+    }
+    .reel.explode::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: white;
+      pointer-events: none;
+      box-shadow:
+        0 0 0 4px #ffffff,
+        18px -12px 0 2px #ffdd55,
+        -22px 16px 0 3px #ff7a00,
+        30px 20px 0 2px #ffffff,
+        -30px -24px 0 2px #ffdd55,
+        6px 36px 0 3px #ff7a00,
+        -8px -40px 0 2px #ffffff;
+      animation: explosionDebris 3s ease-out forwards;
       z-index: 2;
     }
     .result {
@@ -64,42 +86,85 @@
         0 0 10px black;
     }
 
-    @keyframes reelExplosion {
+    @keyframes reelDestruction {
       0% {
         transform: scale(1) rotate(0deg);
+        opacity: 1;
         filter: brightness(1);
+        border-color: white;
+        background: rgba(0,0,0,0.5);
       }
-      20% {
-        transform: scale(1.18) rotate(-6deg);
-        filter: brightness(2.2);
+      8% {
+        transform: scale(1.15) rotate(-8deg);
+        filter: brightness(2.4);
       }
-      40% {
-        transform: scale(0.92) rotate(6deg);
+      16% {
+        transform: scale(0.95) rotate(8deg);
       }
-      60% {
-        transform: scale(1.12) rotate(-4deg);
+      28% {
+        transform: scale(1.35) rotate(-16deg);
+        opacity: 1;
+        filter: brightness(3);
+      }
+      45% {
+        transform: scale(0.75) rotate(22deg) translateY(12px);
+        opacity: 0.65;
+        border-color: rgba(255,255,255,0.35);
+        background: rgba(0,0,0,0.25);
+      }
+      70% {
+        transform: scale(0.35) rotate(-35deg) translateY(40px);
+        opacity: 0.18;
+        border-color: transparent;
+        background: transparent;
       }
       100% {
-        transform: scale(1) rotate(0deg);
+        transform: scale(0) rotate(60deg) translateY(80px);
+        opacity: 0;
         filter: brightness(1);
+        border-color: transparent;
+        background: transparent;
       }
     }
 
     @keyframes bombExplosion {
       0% {
-        transform: scale(0.2);
+        transform: scale(0.2) rotate(0deg);
         opacity: 0;
       }
-      20% {
-        transform: scale(1.2);
+      10% {
+        transform: scale(1.25) rotate(-8deg);
         opacity: 1;
       }
-      70% {
-        transform: scale(1.8);
-        opacity: 0.85;
+      30% {
+        transform: scale(2) rotate(8deg);
+        opacity: 0.95;
+      }
+      60% {
+        transform: scale(2.8) rotate(-12deg);
+        opacity: 0.45;
       }
       100% {
-        transform: scale(2.4);
+        transform: scale(3.6) rotate(20deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes explosionDebris {
+      0% {
+        transform: translate(-50%, -50%) scale(0.1);
+        opacity: 0;
+      }
+      12% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+      }
+      45% {
+        transform: translate(-50%, -50%) scale(4) rotate(120deg);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(8) rotate(260deg);
         opacity: 0;
       }
     }
@@ -127,7 +192,10 @@
 
     function clearExplosionAnimation() {
       reelIds.forEach((id) => {
-        document.getElementById(id).classList.remove('explode');
+        const reel = document.getElementById(id);
+        reel.classList.remove('explode');
+        reel.style.transform = '';
+        reel.style.opacity = '';
       });
     }
 
